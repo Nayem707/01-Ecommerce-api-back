@@ -1,16 +1,40 @@
+//IMPORT -> PACKAGE
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
+//CONFIG
+const connectDB = require('./config/database');
+const dev = require('./config');
+const port = dev.app.port;
+
+//IMPORT -> ROUTER
+const userRoute = require('./MVC/routers/User_Router');
+const productRoute = require('./MVC/routers/Products_Router');
+
+//USE APP
 const app = express();
-const PORT = process.env.PORT || 8000;
 
-const products = require('./data/products.js');
-const users = require('./data/users.js');
-const reviews = require('./data/reviews.js');
-
+//PACKAGE USES
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Sample route to get product data
+// USE MIDDLEWARE
+const logger = require('./middleware/logger_middleware');
+const errorHandler = require('./middleware/errorHandler');
+
+app.use(logger);
+app.use(errorHandler);
+
+//USE ROUTER
+
+app.use('/api/v1/user', userRoute); // USERS
+app.use('/api/v1/product', productRoute); // USERS
+
+// ------------------BASIC-START --------------------- //
+const products = require('./data/products');
 app.get('/api/products', (req, res) => {
   // Fetch data from database or file
   res.json(products);
@@ -19,34 +43,17 @@ app.get('/api/products', (req, res) => {
 // Sample route to get a single product by ID
 app.get('/api/products/:id', (req, res) => {
   const { id } = req.params;
-
   const product = products.find((p) => p.productId === id);
-
   if (product) {
     res.json(product);
   } else {
     res.status(404).json({ message: 'Product not found' });
   }
 });
+// ------------------BASIC-END --------------------- //
 
-// Sample route to get user data
-app.get('/api/users', (req, res) => {
-  // Fetch data from database or file
-  res.json(users); // `users` is the data variable
-});
-
-// Sample route to get reviews
-app.get('/api/reviews', (req, res) => {
-  const reviewsWithUsers = reviews.map((review) => {
-    const user = users.find((user) => user.userId === review.userId);
-    return {
-      ...review,
-      user,
-    };
-  });
-  res.json(reviewsWithUsers);
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+//SERVER RUNING ON
+app.listen(port, async () => {
+  console.log(`server runing http://localhost:${port}`);
+  await connectDB();
 });
