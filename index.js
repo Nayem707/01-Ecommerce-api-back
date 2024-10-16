@@ -3,16 +3,20 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
-//CONFIG
+//CONFIGERATION
 const connectDB = require('./config/database');
 const dev = require('./config');
-const port = dev.app.port;
+const port = dev.app.port; //set config...
 
 //IMPORT -> ROUTER
 const userRoute = require('./MVC/routers/User_Router');
 const productRoute = require('./MVC/routers/Products_Router');
 
-//USE APP
+//IMPORT -> MIDDLEWARE
+const logger = require('./middleware/logger_middleware');
+const errorHandler = require('./middleware/errorHandler');
+
+//APP USES
 const app = express();
 
 //PACKAGE USES
@@ -21,26 +25,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// USE MIDDLEWARE
-const logger = require('./middleware/logger_middleware');
-const errorHandler = require('./middleware/errorHandler');
-
+//MIDDLEWARE USES
 app.use(logger);
 app.use(errorHandler);
 
-//USE ROUTER
-
+//ROUTER USES
 app.use('/api/v1/user', userRoute); // USERS
-app.use('/api/v1/product', productRoute); // USERS
+app.use('/api/v1/product', productRoute); // PRODUCT
 
-// ------------------BASIC-START --------------------- //
+// ----- BASIC-SETUP-SHOW-PRODUCTS-IN-TESTING-PURPOSE ------ //
 const products = require('./data/products');
+
 app.get('/api/products', (req, res) => {
-  // Fetch data from database or file
   res.json(products);
 });
 
-// Sample route to get a single product by ID
 app.get('/api/products/:id', (req, res) => {
   const { id } = req.params;
   const product = products.find((p) => p.productId === id);
@@ -50,7 +49,6 @@ app.get('/api/products/:id', (req, res) => {
     res.status(404).json({ message: 'Product not found' });
   }
 });
-// ------------------BASIC-END --------------------- //
 
 //SERVER RUNING ON
 app.listen(port, async () => {
