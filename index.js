@@ -1,5 +1,7 @@
 //IMPORT -> PACKAGE
 const express = require('express');
+//APP USES
+const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
@@ -15,9 +17,6 @@ const port = dev.app.port; //set config...
 //IMPORT -> MIDDLEWARE
 const logger = require('./middleware/logger_middleware');
 const errorHandler = require('./middleware/errorHandler');
-
-//APP USES
-const app = express();
 
 //PACKAGE USES
 app.use(cors());
